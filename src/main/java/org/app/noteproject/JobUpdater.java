@@ -33,8 +33,6 @@ public class JobUpdater extends Application {
     private VBox tableBox;
     private List<String> jobs;
     ObservableList<String> observableJobList;
-    ObservableList<Note> noteList;
-    List<Note> notes;
 
 
     @Override
@@ -136,7 +134,7 @@ public class JobUpdater extends Application {
                 this.observableJobList.clear();
                 this.observableJobList.addAll(this.jobs);
                 this.jobListView = new ListView<>(this.observableJobList);
-                createNoteTable();
+                populateNoteTable();
             }
         });
 
@@ -314,34 +312,58 @@ public class JobUpdater extends Application {
     }
 
 
-
     public static void main(String[] args) {
         launch();
     }
 
 
+//    public void createNoteTable() {
+//        List<Integer> velocities = new ArrayList<>();
+//        velocities.add(90);
+//        this.job.setSpecificVelocities(velocities);
+////        System.out.println(this.job);
+//        List<Note> notes = new ArrayList<>();
+//        int noteStartTime = 0;
+//        int noteEndTime = 0;
+//        for (int note : this.job.getNotes()) {
+//            for (int velocity : this.job.getVelocities()) {
+//                noteEndTime = noteStartTime + this.job.getNoteDuration();
+//                Note n = new Note(note, velocity, noteStartTime, noteEndTime);
+//                notes.add(n);
+//                noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
+//            }
+//        }
+//        System.out.println("Total number of notes: " + notes.size());
+//
+//        ObservableList<Note> noteList = FXCollections.observableArrayList();
+//        noteList.addAll(notes);
+//
+//        this.noteTableView = new TableView<>();
+//
+//        TableColumn<Note, Integer> noteColumn = new TableColumn<>("Note");
+//        TableColumn<Note, Integer> velocityColumn = new TableColumn<>("Velocity");
+//        TableColumn<Note, Integer> noteStartColumn = new TableColumn<>("Start (ms)");
+//        TableColumn<Note, Integer> noteEndColumn = new TableColumn<>("End (ms)");
+//
+//        noteColumn.setCellValueFactory(new PropertyValueFactory<>("number"));
+//        velocityColumn.setCellValueFactory(new PropertyValueFactory<>("velocity"));
+//        noteStartColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
+//        noteEndColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
+//
+//        this.noteTableView.getColumns().addAll(
+//                noteColumn,
+//                velocityColumn,
+//                noteStartColumn,
+//                noteEndColumn
+//        );
+//        this.noteTableView.getItems().clear();
+//        this.noteTableView.getItems().addAll(noteList);
+//        this.tableBox = new VBox(this.noteTableView);
+//    }
+
 
     public void createNoteTable() {
-        List<Integer> velocities = new ArrayList<>();
-        velocities.add(90);
-        this.job.setSpecificVelocities(velocities);
-//        System.out.println(this.job);
-        this.notes = new ArrayList<>();
-        int noteStartTime = 0;
-        int noteEndTime = 0;
-        for (int note : this.job.getNotes()) {
-            for (int velocity : this.job.getVelocities()) {
-                noteEndTime = noteStartTime + this.job.getNoteDuration();
-                Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-                this.notes.add(n);
-                noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
-            }
-        }
-        System.out.println("Total number of notes: " + this.notes.size());
-
-        this.noteList = FXCollections.observableArrayList();
-        this.noteList.addAll(this.notes);
-
+        // Create the TableView
         this.noteTableView = new TableView<>();
 
         TableColumn<Note, Integer> noteColumn = new TableColumn<>("Note");
@@ -360,17 +382,40 @@ public class JobUpdater extends Application {
                 noteStartColumn,
                 noteEndColumn
         );
-        System.out.println(this.noteList);
-        this.noteTableView.setItems(this.noteList);
+
+        // Populate TableView with data
+        populateNoteTable();
+
         this.tableBox = new VBox(this.noteTableView);
     }
 
+
+    public void populateNoteTable() {
+        List<Note> notes = new ArrayList<>();
+        int noteStartTime = 0;
+        int noteEndTime = 0;
+        for (int note : this.job.getNotes()) {
+            for (int velocity : this.job.getVelocities()) {
+                noteEndTime = noteStartTime + this.job.getNoteDuration();
+                Note n = new Note(note, velocity, noteStartTime, noteEndTime);
+                notes.add(n);
+                noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
+            }
+        }
+        System.out.println("Total number of notes: " + notes.size());
+
+        ObservableList<Note> noteList = FXCollections.observableArrayList();
+        noteList.addAll(notes);
+
+        // Clearing and updating the noteTableView
+        this.noteTableView.getItems().clear();
+        this.noteTableView.getItems().addAll(noteList);
+    }
 
 
     public void processListSelection(ObservableValue<? extends String> val, String oldValue, String newValue) {
         this.colorLabel.setText(newValue);
     }
-
 
 
     public void createJobList() {
