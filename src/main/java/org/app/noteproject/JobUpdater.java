@@ -12,7 +12,6 @@ import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.KeyCode;
-import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
@@ -31,9 +30,11 @@ public class JobUpdater extends Application {
     private TableView<Note> noteTableView;
     private ListView<String> jobListView;
     private Label colorLabel;
-    private VBox box;
+    private VBox tableBox;
     private List<String> jobs;
     ObservableList<String> observableJobList;
+    ObservableList<Note> noteList;
+    List<Note> notes;
 
 
     @Override
@@ -107,7 +108,7 @@ public class JobUpdater extends Application {
         gapBtwNotesSlider.setBlockIncrement(100);
 
         this.jobs = new ArrayList<>();
-//        this.jobs.add(this.job.toString()); // setting initial project to job list view
+        this.jobs.add(this.job.toString()); // setting initial project to job list view
 
         // Updating job with button click
         updateJobBtn.setOnAction(event -> {
@@ -135,6 +136,7 @@ public class JobUpdater extends Application {
                 this.observableJobList.clear();
                 this.observableJobList.addAll(this.jobs);
                 this.jobListView = new ListView<>(this.observableJobList);
+                createNoteTable();
             }
         });
 
@@ -161,7 +163,11 @@ public class JobUpdater extends Application {
                             job.setInterval(Job.Interval.TWELVE);
                         }
                     }
-                    System.out.println(job.toString());
+                    this.jobs.add(this.job.toString());
+                    this.observableJobList.clear();
+                    this.observableJobList.addAll(this.jobs);
+                    this.jobListView = new ListView<>(this.observableJobList);
+//                    System.out.println(job.toString());
                 }
             }
         });
@@ -222,7 +228,7 @@ public class JobUpdater extends Application {
             gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
             gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
 
-            System.out.println(job.toString());
+//            System.out.println(job.toString());
         });
 
         noteDecaySlider.valueProperty().addListener((ov, oldValue, newValue) -> {
@@ -248,7 +254,7 @@ public class JobUpdater extends Application {
             gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
             gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
 
-            System.out.println(job.toString());
+//            System.out.println(job.toString());
         });
 
         gapBtwNotesSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
@@ -267,7 +273,7 @@ public class JobUpdater extends Application {
             gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
             gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
 
-            System.out.println(job.toString());
+//            System.out.println(job.toString());
         });
 
         HBox hbox = new HBox(10);
@@ -294,7 +300,7 @@ public class JobUpdater extends Application {
         SplitPane splitPaneWithTable = new SplitPane();
         splitPaneWithTable.setOrientation(Orientation.VERTICAL); // orientation of pane
         splitPaneWithTable.setDividerPositions(0.25); // how much width occupies on window
-        splitPaneWithTable.getItems().addAll(gridPane, this.box);
+        splitPaneWithTable.getItems().addAll(gridPane, this.tableBox);
 
         SplitPane rootSplitPane = new SplitPane();
         rootSplitPane.setOrientation(Orientation.HORIZONTAL); // orientation of pane
@@ -320,21 +326,21 @@ public class JobUpdater extends Application {
         velocities.add(90);
         this.job.setSpecificVelocities(velocities);
 //        System.out.println(this.job);
-        List<Note> notes = new ArrayList<>();
+        this.notes = new ArrayList<>();
         int noteStartTime = 0;
         int noteEndTime = 0;
         for (int note : this.job.getNotes()) {
             for (int velocity : this.job.getVelocities()) {
                 noteEndTime = noteStartTime + this.job.getNoteDuration();
                 Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-                notes.add(n);
+                this.notes.add(n);
                 noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
             }
         }
-        System.out.println("Total number of notes: " + notes.size());
+        System.out.println("Total number of notes: " + this.notes.size());
 
-        ObservableList<Note> noteList = FXCollections.observableArrayList();
-        noteList.addAll(notes);
+        this.noteList = FXCollections.observableArrayList();
+        this.noteList.addAll(this.notes);
 
         this.noteTableView = new TableView<>();
 
@@ -354,8 +360,9 @@ public class JobUpdater extends Application {
                 noteStartColumn,
                 noteEndColumn
         );
-        this.noteTableView.setItems(noteList);
-        this.box = new VBox(this.noteTableView);
+        System.out.println(this.noteList);
+        this.noteTableView.setItems(this.noteList);
+        this.tableBox = new VBox(this.noteTableView);
     }
 
 
@@ -371,7 +378,7 @@ public class JobUpdater extends Application {
         this.observableJobList.addAll(this.jobs);
         this.jobListView = new ListView<>(this.observableJobList);
         this.jobListView.getSelectionModel().select(0); // initial/default selection inside the list
-//        this.jobListView.getSelectionModel().selectedItemProperty().addListener(this::processListSelection);
+//        this.jobListView.getSelectionModel().selectedItemProperty().addListener(this::processListSelection); // Listens to what element in the list is selected
 //        this.colorLabel = new Label(observableJobList.get(0)); // default value shown in pane
 //        StackPane colorPane = new StackPane(this.colorLabel);
     }
