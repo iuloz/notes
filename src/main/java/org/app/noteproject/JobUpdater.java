@@ -4,7 +4,6 @@ import javafx.application.Application;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.geometry.HPos;
 import javafx.geometry.Orientation;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,7 +18,6 @@ import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.canvas.Canvas;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +27,6 @@ public class JobUpdater extends Application {
     private RadioButton selectedRadioButton;
     private TableView<Note> noteTableView;
     private ListView<String> jobListView;
-    private Label colorLabel;
     private VBox tableBox;
     private List<Job> jobs = new ArrayList<>();
     private ObservableList<String> observableJobList;
@@ -125,10 +122,16 @@ public class JobUpdater extends Application {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
             int toNote = spinner2.getValue();
+            int noteDuration = job.getNoteDuration();
+            int noteDecay = job.getNoteDecay();
+            int noteGap = job.getNoteGap();
             if (!newName.isEmpty() && newName.length() < 21) {
                 this.job = new Job(newName);
                 job.setFromNote(fromNote);
                 job.setToNote(toNote);
+                job.setNoteDuration(noteDuration);
+                job.setNoteDecay(noteDecay);
+                job.setNoteGap(noteGap);
 
                 // Accessing selected radio button
                 if (selectedRadioButton != null) {
@@ -440,6 +443,7 @@ public class JobUpdater extends Application {
         // Find the selected job by its name
         selectedJob = findJobByName(newValue);
         if (selectedJob != null) {
+            System.out.println(selectedJob.getNoteDuration());
             // Update text fields, sliders, labels, etc. with values from the selected job
             jobNameField.setText(selectedJob.getName());
             spinner1.getValueFactory().setValue(selectedJob.getFromNote());
