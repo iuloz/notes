@@ -31,23 +31,48 @@ public class JobUpdater extends Application {
     private ListView<String> jobListView;
     private Label colorLabel;
     private VBox tableBox;
-    private List<String> jobs;
-    ObservableList<String> observableJobList;
+    private List<Job> jobs;
+    private ObservableList<String> observableJobList;
+    private TextField jobNameField;
+    private Spinner<Integer> spinner1;
+    private Spinner<Integer> spinner2;
+    private RadioButton interval1;
+    private RadioButton interval3;
+    private RadioButton interval6;
+    private RadioButton interval12;
+    private Slider noteDurationSlider;
+    private Slider noteDecaySlider;
+    private Slider gapBtwNotesSlider;
+    private Job selectedJob;
 
 
     @Override
     public void start(Stage stage) {
-        TextField jobNameField = new TextField();
-        Button updateJobBtn = new Button("Update job");
+        jobNameField = new TextField();
+        Button createNewJobBtn = new Button("Create new job");
 
         SpinnerValueFactory<Integer> valueFactory1 = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 127, 40, 1);
         SpinnerValueFactory<Integer> valueFactory2 = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 127, 120, 1);
 
-        Spinner<Integer> spinner1 = new Spinner<>();
-        Spinner<Integer> spinner2 = new Spinner<>();
+        spinner1 = new Spinner<>();
+        spinner2 = new Spinner<>();
 
         spinner1.setValueFactory(valueFactory1);
         spinner2.setValueFactory(valueFactory2);
+
+        // Listener for spinner1
+        spinner1.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (selectedJob != null) {
+                selectedJob.setFromNote(newValue);
+            }
+        });
+
+        // Listener for spinner2
+        spinner2.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> {
+            if (selectedJob != null) {
+                selectedJob.setToNote(newValue);
+            }
+        });
 
         Label textFieldLabel = new Label("Job name");
         Label spinner1Label = new Label("Start note");
@@ -71,10 +96,10 @@ public class JobUpdater extends Application {
 
         // Radio buttons for interval settings
         ToggleGroup toggleGroup = new ToggleGroup();
-        RadioButton interval1 = new RadioButton("1");
-        RadioButton interval3 = new RadioButton("3");
-        RadioButton interval6 = new RadioButton("6");
-        RadioButton interval12 = new RadioButton("12");
+        interval1 = new RadioButton("1");
+        interval3 = new RadioButton("3");
+        interval6 = new RadioButton("6");
+        interval12 = new RadioButton("12");
 
         // Adding radio buttons to toggle group
         interval1.setToggleGroup(toggleGroup);
@@ -89,9 +114,9 @@ public class JobUpdater extends Application {
             }
         });
 
-        Slider noteDurationSlider = new Slider(100, 5000, job.getNoteDuration());
-        Slider noteDecaySlider = new Slider(100, 4500, job.getNoteDecay());
-        Slider gapBtwNotesSlider = new Slider(100, 500, job.getNoteGap());
+        noteDurationSlider = new Slider(100, 5000, job.getNoteDuration());
+        noteDecaySlider = new Slider(100, 4500, job.getNoteDecay());
+        gapBtwNotesSlider = new Slider(100, 500, job.getNoteGap());
 
         noteDurationSlider.setShowTickMarks(true);
         noteDurationSlider.setMajorTickUnit(100);
@@ -106,15 +131,16 @@ public class JobUpdater extends Application {
         gapBtwNotesSlider.setBlockIncrement(100);
 
         this.jobs = new ArrayList<>();
-        this.jobs.add(this.job.toString()); // setting initial project to job list view
+//        this.jobs.add(this.job); // setting initial project to job list view
 
         // Updating job with button click
-        updateJobBtn.setOnAction(event -> {
+        createNewJobBtn.setOnAction(event -> {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
             int toNote = spinner2.getValue();
             if (!newName.isEmpty() && newName.length() < 21) {
-                job.setName(newName);
+                this.job = new Job(newName);
+//                job.setName(newName);
                 job.setFromNote(fromNote);
                 job.setToNote(toNote);
 
@@ -130,9 +156,11 @@ public class JobUpdater extends Application {
                         job.setInterval(Job.Interval.TWELVE);
                     }
                 }
-                this.jobs.add(this.job.toString());
+                this.jobs.add(this.job);
                 this.observableJobList.clear();
-                this.observableJobList.addAll(this.jobs);
+                for (Job job : this.jobs) {
+                    this.observableJobList.add(job.getName());
+                }
                 this.jobListView = new ListView<>(this.observableJobList);
                 populateNoteTable();
             }
@@ -161,9 +189,11 @@ public class JobUpdater extends Application {
                             job.setInterval(Job.Interval.TWELVE);
                         }
                     }
-                    this.jobs.add(this.job.toString());
+                    this.jobs.add(this.job);
                     this.observableJobList.clear();
-                    this.observableJobList.addAll(this.jobs);
+                    for (Job job : this.jobs) {
+                        this.observableJobList.add(job.getName());
+                    }
                     this.jobListView = new ListView<>(this.observableJobList);
 //                    System.out.println(job.toString());
                 }
@@ -288,9 +318,9 @@ public class JobUpdater extends Application {
 
         gridPane.add(titledPane, 0, 3, 2, 1);
         gridPane.add(slidersTitlePane, 0, 4, 2, 1);
-        gridPane.add(updateJobBtn, 0, 5, 2, 1);
+        gridPane.add(createNewJobBtn, 0, 5, 2, 1);
 
-        GridPane.setHalignment(updateJobBtn, HPos.CENTER);
+        GridPane.setHalignment(createNewJobBtn, HPos.CENTER);
 
         createNoteTable();
         createJobList();
@@ -315,51 +345,6 @@ public class JobUpdater extends Application {
     public static void main(String[] args) {
         launch();
     }
-
-
-//    public void createNoteTable() {
-//        List<Integer> velocities = new ArrayList<>();
-//        velocities.add(90);
-//        this.job.setSpecificVelocities(velocities);
-////        System.out.println(this.job);
-//        List<Note> notes = new ArrayList<>();
-//        int noteStartTime = 0;
-//        int noteEndTime = 0;
-//        for (int note : this.job.getNotes()) {
-//            for (int velocity : this.job.getVelocities()) {
-//                noteEndTime = noteStartTime + this.job.getNoteDuration();
-//                Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-//                notes.add(n);
-//                noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
-//            }
-//        }
-//        System.out.println("Total number of notes: " + notes.size());
-//
-//        ObservableList<Note> noteList = FXCollections.observableArrayList();
-//        noteList.addAll(notes);
-//
-//        this.noteTableView = new TableView<>();
-//
-//        TableColumn<Note, Integer> noteColumn = new TableColumn<>("Note");
-//        TableColumn<Note, Integer> velocityColumn = new TableColumn<>("Velocity");
-//        TableColumn<Note, Integer> noteStartColumn = new TableColumn<>("Start (ms)");
-//        TableColumn<Note, Integer> noteEndColumn = new TableColumn<>("End (ms)");
-//
-//        noteColumn.setCellValueFactory(new PropertyValueFactory<>("number"));
-//        velocityColumn.setCellValueFactory(new PropertyValueFactory<>("velocity"));
-//        noteStartColumn.setCellValueFactory(new PropertyValueFactory<>("startTime"));
-//        noteEndColumn.setCellValueFactory(new PropertyValueFactory<>("endTime"));
-//
-//        this.noteTableView.getColumns().addAll(
-//                noteColumn,
-//                velocityColumn,
-//                noteStartColumn,
-//                noteEndColumn
-//        );
-//        this.noteTableView.getItems().clear();
-//        this.noteTableView.getItems().addAll(noteList);
-//        this.tableBox = new VBox(this.noteTableView);
-//    }
 
 
     public void createNoteTable() {
@@ -413,18 +398,65 @@ public class JobUpdater extends Application {
     }
 
 
-    public void processListSelection(ObservableValue<? extends String> val, String oldValue, String newValue) {
-        this.colorLabel.setText(newValue);
+    public void createJobList() {
+        this.observableJobList = FXCollections.observableArrayList();
+        for (Job job : this.jobs) {
+            this.observableJobList.add(job.getName());
+        }
+        this.jobListView = new ListView<>(this.observableJobList);
+        this.jobListView.getSelectionModel().select(0); // initial/default selection inside the list
+        this.jobListView.getSelectionModel().selectedItemProperty().addListener(this::processListSelection); // Listens to what element in the list is selected
+//        this.colorLabel = new Label(observableJobList.get(0)); // default value shown in pane
+//        StackPane colorPane = new StackPane(this.colorLabel);
     }
 
 
-    public void createJobList() {
-        this.observableJobList = FXCollections.observableArrayList();
-        this.observableJobList.addAll(this.jobs);
-        this.jobListView = new ListView<>(this.observableJobList);
-        this.jobListView.getSelectionModel().select(0); // initial/default selection inside the list
-//        this.jobListView.getSelectionModel().selectedItemProperty().addListener(this::processListSelection); // Listens to what element in the list is selected
-//        this.colorLabel = new Label(observableJobList.get(0)); // default value shown in pane
-//        StackPane colorPane = new StackPane(this.colorLabel);
+    public Job findJobByName(String name) {
+        // Search for the job in the list of jobs by its name
+        for (Job job : jobs) {
+            if (job.getName().equals(name)) {
+                return job;
+            }
+        }
+        return null; // Job not found
+    }
+
+
+    public void processListSelection(ObservableValue<? extends String> val, String oldValue, String newValue) {
+        // Find the selected job by its name
+        selectedJob = findJobByName(newValue);
+        if (selectedJob != null) {
+            // Update text fields, sliders, labels, etc. with values from the selected job
+            jobNameField.setText(selectedJob.getName());
+            spinner1.getValueFactory().setValue(selectedJob.getFromNote());
+            spinner2.getValueFactory().setValue(selectedJob.getToNote());
+            // Update interval radio buttons
+            switch (selectedJob.getInterval()) {
+                case ONE:
+                    interval1.setSelected(true);
+                    break;
+                case THREE:
+                    interval3.setSelected(true);
+                    break;
+                case SIX:
+                    interval6.setSelected(true);
+                    break;
+                case TWELVE:
+                    interval12.setSelected(true);
+                    break;
+            }
+            // Update sliders
+            noteDurationSlider.setValue(selectedJob.getNoteDuration());
+            noteDecaySlider.setValue(selectedJob.getNoteDecay());
+            gapBtwNotesSlider.setValue(selectedJob.getNoteGap());
+
+            // Update note table
+//            populateNoteTable();
+        }
+    }
+
+
+    public void updateCurrentJobValue() {
+
     }
 }
