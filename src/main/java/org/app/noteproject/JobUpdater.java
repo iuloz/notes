@@ -50,6 +50,7 @@ public class JobUpdater extends Application {
     public void start(Stage stage) {
         jobNameField = new TextField();
         Button createNewJobBtn = new Button("Create new job");
+        Button updateJobBtn = new Button("Update job");
 
         SpinnerValueFactory<Integer> valueFactory1 = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 127, 40, 1);
         SpinnerValueFactory<Integer> valueFactory2 = new SpinnerValueFactory.IntegerSpinnerValueFactory(0, 127, 120, 1);
@@ -60,19 +61,6 @@ public class JobUpdater extends Application {
         spinner1.setValueFactory(valueFactory1);
         spinner2.setValueFactory(valueFactory2);
 
-        // Listener for spinner1
-        spinner1.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (selectedJob != null) {
-                selectedJob.setFromNote(newValue);
-            }
-        });
-
-        // Listener for spinner2
-        spinner2.getValueFactory().valueProperty().addListener((observable, oldValue, newValue) -> {
-            if (selectedJob != null) {
-                selectedJob.setToNote(newValue);
-            }
-        });
 
         Label textFieldLabel = new Label("Job name");
         Label spinner1Label = new Label("Start note");
@@ -200,6 +188,36 @@ public class JobUpdater extends Application {
             }
         });
 
+        updateJobBtn.setOnAction(event -> {
+            String newName = jobNameField.getText().trim();
+            int fromNote = spinner1.getValue();
+            int toNote = spinner2.getValue();
+            if (!newName.isEmpty() && newName.length() < 21) {
+                selectedJob.setName(newName);
+                selectedJob.setFromNote(fromNote);
+                selectedJob.setToNote(toNote);
+
+                // Accessing selected radio button
+                if (selectedRadioButton != null) {
+                    if (selectedRadioButton.equals(interval1)) {
+                        selectedJob.setInterval(Job.Interval.ONE);
+                    } else if (selectedRadioButton.equals(interval3)) {
+                        selectedJob.setInterval(Job.Interval.THREE);
+                    } else if (selectedRadioButton.equals(interval6)) {
+                        selectedJob.setInterval(Job.Interval.SIX);
+                    } else if (selectedRadioButton.equals(interval12)) {
+                        selectedJob.setInterval(Job.Interval.TWELVE);
+                    }
+                }
+                this.observableJobList.clear();
+                for (Job job : this.jobs) {
+                    this.observableJobList.add(job.getName());
+                }
+                this.jobListView = new ListView<>(this.observableJobList);
+                populateNoteTable();
+            }
+        });
+
         // Creating canvas
         int height = 30;
         Canvas noteTimingCanvas = new Canvas(500, height);
@@ -316,11 +334,13 @@ public class JobUpdater extends Application {
         TitledPane titledPane = new TitledPane("Interval Settings", hbox);
         TitledPane slidersTitlePane = new TitledPane("Note times", slidersVbox);
 
+        HBox buttonsBox = new HBox(20);
+        buttonsBox.getChildren().addAll(updateJobBtn, createNewJobBtn);
+        buttonsBox.setAlignment(Pos.CENTER);
+
         gridPane.add(titledPane, 0, 3, 2, 1);
         gridPane.add(slidersTitlePane, 0, 4, 2, 1);
-        gridPane.add(createNewJobBtn, 0, 5, 2, 1);
-
-        GridPane.setHalignment(createNewJobBtn, HPos.CENTER);
+        gridPane.add(buttonsBox, 1, 5, 2, 1);
 
         createNoteTable();
         createJobList();
