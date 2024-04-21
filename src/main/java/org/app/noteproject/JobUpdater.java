@@ -31,7 +31,7 @@ public class JobUpdater extends Application {
     private ListView<String> jobListView;
     private Label colorLabel;
     private VBox tableBox;
-    private List<Job> jobs;
+    private List<Job> jobs = new ArrayList<>();
     private ObservableList<String> observableJobList;
     private TextField jobNameField;
     private Spinner<Integer> spinner1;
@@ -118,7 +118,6 @@ public class JobUpdater extends Application {
         gapBtwNotesSlider.setMajorTickUnit(100);
         gapBtwNotesSlider.setBlockIncrement(100);
 
-        this.jobs = new ArrayList<>();
 //        this.jobs.add(this.job); // setting initial project to job list view
 
         // Updating job with button click
@@ -128,7 +127,6 @@ public class JobUpdater extends Application {
             int toNote = spinner2.getValue();
             if (!newName.isEmpty() && newName.length() < 21) {
                 this.job = new Job(newName);
-//                job.setName(newName);
                 job.setFromNote(fromNote);
                 job.setToNote(toNote);
 
@@ -145,23 +143,21 @@ public class JobUpdater extends Application {
                     }
                 }
                 this.jobs.add(this.job);
-                this.observableJobList.clear();
-                for (Job job : this.jobs) {
-                    this.observableJobList.add(job.getName());
-                }
-                this.jobListView = new ListView<>(this.observableJobList);
-                populateNoteTable();
+                this.observableJobList.add(this.job.getName()); // Add only the name
+                jobListView.getSelectionModel().selectLast(); // Select the newly added job
+                populateNoteTable(); // Update the note table
             }
         });
 
-        // Changing job name with ENTER key, when text field is in focus
+
+        // Creating job with ENTER key, when text field is in focus
         jobNameField.setOnKeyPressed(event -> {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
             int toNote = spinner2.getValue();
             if (!newName.isEmpty() && newName.length() < 21) {
                 if (event.getCode() == KeyCode.ENTER) {
-                    job.setName(newName);
+                    this.job = new Job(newName);
                     job.setFromNote(fromNote);
                     job.setToNote(toNote);
 
@@ -178,12 +174,9 @@ public class JobUpdater extends Application {
                         }
                     }
                     this.jobs.add(this.job);
-                    this.observableJobList.clear();
-                    for (Job job : this.jobs) {
-                        this.observableJobList.add(job.getName());
-                    }
-                    this.jobListView = new ListView<>(this.observableJobList);
-//                    System.out.println(job.toString());
+                    this.observableJobList.add(this.job.getName()); // Add only the name
+                    jobListView.getSelectionModel().selectLast(); // Select the newly added job
+                    populateNoteTable(); // Update the note table
                 }
             }
         });
@@ -192,7 +185,7 @@ public class JobUpdater extends Application {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
             int toNote = spinner2.getValue();
-            if (!newName.isEmpty() && newName.length() < 21) {
+            if (!newName.isEmpty() && newName.length() < 21 && selectedJob != null) {
                 selectedJob.setName(newName);
                 selectedJob.setFromNote(fromNote);
                 selectedJob.setToNote(toNote);
@@ -209,14 +202,13 @@ public class JobUpdater extends Application {
                         selectedJob.setInterval(Job.Interval.TWELVE);
                     }
                 }
-                this.observableJobList.clear();
-                for (Job job : this.jobs) {
-                    this.observableJobList.add(job.getName());
-                }
-                this.jobListView = new ListView<>(this.observableJobList);
-                populateNoteTable();
+
+                // Update the observable list with the updated job name
+                observableJobList.set(jobListView.getSelectionModel().getSelectedIndex(), selectedJob.getName());
+                populateNoteTable(); // Update the note table
             }
         });
+
 
         // Creating canvas
         int height = 30;
@@ -396,25 +388,27 @@ public class JobUpdater extends Application {
 
 
     public void populateNoteTable() {
-        List<Note> notes = new ArrayList<>();
-        int noteStartTime = 0;
-        int noteEndTime = 0;
-        for (int note : this.job.getNotes()) {
-            for (int velocity : this.job.getVelocities()) {
-                noteEndTime = noteStartTime + this.job.getNoteDuration();
-                Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-                notes.add(n);
-                noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
+        if (selectedJob != null) {
+            List<Note> notes = new ArrayList<>();
+            int noteStartTime = 0;
+            int noteEndTime = 0;
+            for (int note : this.selectedJob.getNotes()) {
+                for (int velocity : this.selectedJob.getVelocities()) {
+                    noteEndTime = noteStartTime + this.selectedJob.getNoteDuration();
+                    Note n = new Note(note, velocity, noteStartTime, noteEndTime);
+                    notes.add(n);
+                    noteStartTime += this.selectedJob.getNoteDuration() + this.selectedJob.getNoteDecay() + this.selectedJob.getNoteGap();
+                }
             }
+            System.out.println("Total number of notes: " + notes.size());
+
+            ObservableList<Note> noteList = FXCollections.observableArrayList();
+            noteList.addAll(notes);
+
+            // Clearing and updating the noteTableView
+            this.noteTableView.getItems().clear();
+            this.noteTableView.getItems().addAll(noteList);
         }
-        System.out.println("Total number of notes: " + notes.size());
-
-        ObservableList<Note> noteList = FXCollections.observableArrayList();
-        noteList.addAll(notes);
-
-        // Clearing and updating the noteTableView
-        this.noteTableView.getItems().clear();
-        this.noteTableView.getItems().addAll(noteList);
     }
 
 
@@ -471,12 +465,7 @@ public class JobUpdater extends Application {
             gapBtwNotesSlider.setValue(selectedJob.getNoteGap());
 
             // Update note table
-//            populateNoteTable();
+            populateNoteTable();
         }
-    }
-
-
-    public void updateCurrentJobValue() {
-
     }
 }
