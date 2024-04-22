@@ -41,6 +41,9 @@ public class JobUpdater extends Application {
     private Slider noteDecaySlider;
     private Slider gapBtwNotesSlider;
     private Job selectedJob;
+    private int currentNoteDuration;
+    private int currentNoteDecay;
+    private int currentNoteGap;
 
 
     @Override
@@ -122,16 +125,13 @@ public class JobUpdater extends Application {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
             int toNote = spinner2.getValue();
-            int noteDuration = job.getNoteDuration();
-            int noteDecay = job.getNoteDecay();
-            int noteGap = job.getNoteGap();
             if (!newName.isEmpty() && newName.length() < 21) {
                 this.job = new Job(newName);
                 job.setFromNote(fromNote);
                 job.setToNote(toNote);
-                job.setNoteDuration(noteDuration);
-                job.setNoteDecay(noteDecay);
-                job.setNoteGap(noteGap);
+                job.setNoteDuration(currentNoteDuration);
+                job.setNoteDecay(currentNoteDecay);
+                job.setNoteGap(currentNoteGap);
 
                 // Accessing selected radio button
                 if (selectedRadioButton != null) {
@@ -239,10 +239,15 @@ public class JobUpdater extends Application {
         gc.fillRect(durationWidth + decayWidth, 0, gapWidth, height);
         gc.strokeRect(durationWidth + decayWidth, 0, gapWidth, height);
 
+        // Default note timings
+        currentNoteDuration = job.getNoteDuration();
+        currentNoteDecay = job.getNoteDecay();
+        currentNoteGap = job.getNoteGap();
+
         // Event handlers to update slider labels
         noteDurationSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
             int duration = newValue.intValue();
-            job.setNoteDuration(duration);
+            currentNoteDuration = duration;
             noteDurationLabel.setText("Note Duration: " + duration + " ms");
 
             // Redrawing canvas
@@ -274,7 +279,7 @@ public class JobUpdater extends Application {
 
         noteDecaySlider.valueProperty().addListener((ov, oldValue, newValue) -> {
             int decay = newValue.intValue();
-            job.setNoteDecay(decay);
+            currentNoteDecay = decay;
             noteDecayLabel.setText("Note Decay: " + decay + " ms");
 
             // Redrawing canvas
@@ -300,7 +305,7 @@ public class JobUpdater extends Application {
 
         gapBtwNotesSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
             int gap = newValue.intValue();
-            job.setNoteGap(gap);
+            currentNoteGap = gap;
             gapBtwNotesLabel.setText("Note Gap: " + gap + " ms");
 
             // Redrawing canvas
@@ -403,8 +408,6 @@ public class JobUpdater extends Application {
                     noteStartTime += this.selectedJob.getNoteDuration() + this.selectedJob.getNoteDecay() + this.selectedJob.getNoteGap();
                 }
             }
-            System.out.println("Total number of notes: " + notes.size());
-
             ObservableList<Note> noteList = FXCollections.observableArrayList();
             noteList.addAll(notes);
 
