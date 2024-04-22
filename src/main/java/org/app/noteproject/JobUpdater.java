@@ -18,6 +18,7 @@ import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.canvas.Canvas;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,6 +45,9 @@ public class JobUpdater extends Application {
     private int currentNoteDuration;
     private int currentNoteDecay;
     private int currentNoteGap;
+    private int currentInterval = 6;
+    private int spinner1Value;
+    private int spinner2Value;
 
 
     @Override
@@ -61,6 +65,18 @@ public class JobUpdater extends Application {
         spinner1.setValueFactory(valueFactory1);
         spinner2.setValueFactory(valueFactory2);
 
+        spinner1Value = job.getFromNote();
+        spinner2Value = job.getToNote();
+
+        spinner1.valueProperty().addListener((observable, oldValue, newValue) -> {
+            spinner1Value = newValue;
+            populateNoteTable();
+        });
+
+        spinner2.valueProperty().addListener((observable, oldValue, newValue) -> {
+            spinner2Value = newValue;
+            populateNoteTable();
+        });
 
         Label textFieldLabel = new Label("Job name");
         Label spinner1Label = new Label("Start note");
@@ -101,6 +117,16 @@ public class JobUpdater extends Application {
         toggleGroup.selectedToggleProperty().addListener((observable, prevButton, newButton) -> {
             if (newButton != null) {
                 selectedRadioButton = (RadioButton) newButton; // Store the selected radio button
+                if (selectedRadioButton.equals(interval1)) {
+                    currentInterval = 1;
+                } else if (selectedRadioButton.equals(interval3)) {
+                    currentInterval = 3;
+                } else if (selectedRadioButton.equals(interval6)) {
+                    currentInterval = 6;
+                } else if (selectedRadioButton.equals(interval12)) {
+                    currentInterval = 12;
+                }
+                populateNoteTable();
             }
         });
 
@@ -281,8 +307,6 @@ public class JobUpdater extends Application {
             gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
             populateNoteTable();
-
-//            System.out.println(job.toString());
         });
 
         noteDecaySlider.valueProperty().addListener((ov, oldValue, newValue) -> {
@@ -308,7 +332,7 @@ public class JobUpdater extends Application {
             gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
             gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
-//            System.out.println(job.toString());
+            populateNoteTable();
         });
 
         gapBtwNotesSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
@@ -327,7 +351,7 @@ public class JobUpdater extends Application {
             gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
             gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
-//            System.out.println(job.toString());
+            populateNoteTable();
         });
 
         HBox hbox = new HBox(10);
@@ -404,30 +428,37 @@ public class JobUpdater extends Application {
 
 
     public void populateNoteTable() {
-        List<Note> notes = new ArrayList<>();
+        List<Integer> notes = new ArrayList<>();
+        int fromNote = spinner1Value;
+        int toNote = spinner2Value;
+        while (fromNote <= toNote) {
+            notes.add(fromNote);
+            fromNote += currentInterval;
+        }
+        List<Note> notesToTable = new ArrayList<>();
         int noteStartTime = 0;
         int noteEndTime = 0;
         if (selectedJob != null) {
-            for (int note : this.selectedJob.getNotes()) {
+            for (int note : notes) {
                 for (int velocity : this.selectedJob.getVelocities()) {
-                    noteEndTime = noteStartTime + this.selectedJob.getNoteDuration();
+                    noteEndTime = noteStartTime + currentNoteDuration;
                     Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-                    notes.add(n);
-                    noteStartTime += this.selectedJob.getNoteDuration() + this.selectedJob.getNoteDecay() + this.selectedJob.getNoteGap();
+                    notesToTable.add(n);
+                    noteStartTime += currentNoteDuration + currentNoteDecay + currentNoteGap;
                 }
             }
         } else {
-            for (int note : this.job.getNotes()) {
+            for (int note : notes) {
                 for (int velocity : this.job.getVelocities()) {
-                    noteEndTime = noteStartTime + this.job.getNoteDuration();
+                    noteEndTime = noteStartTime + currentNoteDuration;
                     Note n = new Note(note, velocity, noteStartTime, noteEndTime);
-                    notes.add(n);
-                    noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
+                    notesToTable.add(n);
+                    noteStartTime += currentNoteDuration + currentNoteDecay + currentNoteGap;
                 }
             }
         }
         ObservableList<Note> noteList = FXCollections.observableArrayList();
-        noteList.addAll(notes);
+        noteList.addAll(notesToTable);
 
         // Clearing and updating the noteTableView
         this.noteTableView.getItems().clear();
@@ -472,15 +503,19 @@ public class JobUpdater extends Application {
             switch (selectedJob.getInterval()) {
                 case ONE:
                     interval1.setSelected(true);
+                    currentInterval = 1;
                     break;
                 case THREE:
                     interval3.setSelected(true);
+                    currentInterval = 3;
                     break;
                 case SIX:
                     interval6.setSelected(true);
+                    currentInterval = 6;
                     break;
                 case TWELVE:
                     interval12.setSelected(true);
+                    currentInterval = 12;
                     break;
             }
             // Update sliders
