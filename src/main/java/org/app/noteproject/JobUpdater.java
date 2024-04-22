@@ -163,6 +163,9 @@ public class JobUpdater extends Application {
                     this.job = new Job(newName);
                     job.setFromNote(fromNote);
                     job.setToNote(toNote);
+                    job.setNoteDuration(currentNoteDuration);
+                    job.setNoteDecay(currentNoteDecay);
+                    job.setNoteGap(currentNoteGap);
 
                     // Accessing selected radio button
                     if (selectedRadioButton != null) {
@@ -192,6 +195,9 @@ public class JobUpdater extends Application {
                 selectedJob.setName(newName);
                 selectedJob.setFromNote(fromNote);
                 selectedJob.setToNote(toNote);
+                selectedJob.setNoteDuration(currentNoteDuration);
+                selectedJob.setNoteDecay(currentNoteDecay);
+                selectedJob.setNoteGap(currentNoteGap);
 
                 // Accessing selected radio button
                 if (selectedRadioButton != null) {
@@ -251,9 +257,9 @@ public class JobUpdater extends Application {
             noteDurationLabel.setText("Note Duration: " + duration + " ms");
 
             // Redrawing canvas
-            gc.clearRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.clearRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
             gc.setFill(Color.LIGHTGRAY);
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.fillRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
 
             // Drawing duration block
             gc.setFill(Color.BLUE);
@@ -264,15 +270,15 @@ public class JobUpdater extends Application {
             // Below decay and gap blocks are drawn here in order to retain their color when duration block is changed
             // Drawing decay block
             gc.setFill(Color.LIGHTBLUE);
-            final int decayW = job.getNoteDecay() / 20;
-            gc.fillRect(job.getNoteDuration() / 20.0, 0, decayW, height);
-            gc.strokeRect(job.getNoteDuration() / 20.0, 0, decayW, height);
+            final int decayW = currentNoteDecay / 20;
+            gc.fillRect(currentNoteDuration / 20.0, 0, decayW, height);
+            gc.strokeRect(currentNoteDuration / 20.0, 0, decayW, height);
 
             // Drawing gap block
             gc.setFill(Color.GRAY);
-            final int gapW = job.getNoteGap() / 20;
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
-            gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
+            final int gapW = currentNoteGap / 20;
+            gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
+            gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
 //            System.out.println(job.toString());
         });
@@ -283,22 +289,22 @@ public class JobUpdater extends Application {
             noteDecayLabel.setText("Note Decay: " + decay + " ms");
 
             // Redrawing canvas
-            gc.clearRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.clearRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
             gc.setFill(Color.LIGHTGRAY);
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.fillRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
 
             // Drawing decay block
             gc.setFill(Color.LIGHTBLUE);
-            final int decayW = job.getNoteDecay() / 20;
-            gc.fillRect(job.getNoteDuration() / 20.0, 0, decayW, height);
-            gc.strokeRect(job.getNoteDuration() / 20.0, 0, decayW, height);
+            final int decayW = currentNoteDecay / 20;
+            gc.fillRect(currentNoteDuration / 20.0, 0, decayW, height);
+            gc.strokeRect(currentNoteDuration / 20.0, 0, decayW, height);
 
             // Below gap block is drawn here in order to retain its color when decay block is changed
             // Drawing gap block
             gc.setFill(Color.GRAY);
-            final int gapW = job.getNoteGap() / 20;
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
-            gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
+            final int gapW = currentNoteGap / 20;
+            gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
+            gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
 //            System.out.println(job.toString());
         });
@@ -309,15 +315,15 @@ public class JobUpdater extends Application {
             gapBtwNotesLabel.setText("Note Gap: " + gap + " ms");
 
             // Redrawing canvas
-            gc.clearRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.clearRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
             gc.setFill(Color.LIGHTGRAY);
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay() + job.getNoteGap()) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
+            gc.fillRect((currentNoteDuration + currentNoteDecay + currentNoteGap) / 20.0, 0, noteTimingCanvas.getWidth(), noteTimingCanvas.getHeight());
 
             // Drawing gap block
             gc.setFill(Color.GRAY);
-            final int gapW = job.getNoteGap() / 20;
-            gc.fillRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
-            gc.strokeRect((job.getNoteDuration() + job.getNoteDecay()) / 20.0, 0, gapW, height);
+            final int gapW = currentNoteGap / 20;
+            gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
+            gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
 //            System.out.println(job.toString());
         });
