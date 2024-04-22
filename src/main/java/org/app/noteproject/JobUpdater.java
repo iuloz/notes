@@ -95,6 +95,8 @@ public class JobUpdater extends Application {
         interval6.setToggleGroup(toggleGroup);
         interval12.setToggleGroup(toggleGroup);
 
+        interval6.setSelected(true);
+
         // Event handler for radio buttons
         toggleGroup.selectedToggleProperty().addListener((observable, prevButton, newButton) -> {
             if (newButton != null) {
@@ -278,6 +280,8 @@ public class JobUpdater extends Application {
             gc.fillRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
             gc.strokeRect((currentNoteDuration + currentNoteDecay) / 20.0, 0, gapW, height);
 
+            populateNoteTable();
+
 //            System.out.println(job.toString());
         });
 
@@ -400,10 +404,10 @@ public class JobUpdater extends Application {
 
 
     public void populateNoteTable() {
+        List<Note> notes = new ArrayList<>();
+        int noteStartTime = 0;
+        int noteEndTime = 0;
         if (selectedJob != null) {
-            List<Note> notes = new ArrayList<>();
-            int noteStartTime = 0;
-            int noteEndTime = 0;
             for (int note : this.selectedJob.getNotes()) {
                 for (int velocity : this.selectedJob.getVelocities()) {
                     noteEndTime = noteStartTime + this.selectedJob.getNoteDuration();
@@ -412,13 +416,22 @@ public class JobUpdater extends Application {
                     noteStartTime += this.selectedJob.getNoteDuration() + this.selectedJob.getNoteDecay() + this.selectedJob.getNoteGap();
                 }
             }
-            ObservableList<Note> noteList = FXCollections.observableArrayList();
-            noteList.addAll(notes);
-
-            // Clearing and updating the noteTableView
-            this.noteTableView.getItems().clear();
-            this.noteTableView.getItems().addAll(noteList);
+        } else {
+            for (int note : this.job.getNotes()) {
+                for (int velocity : this.job.getVelocities()) {
+                    noteEndTime = noteStartTime + this.job.getNoteDuration();
+                    Note n = new Note(note, velocity, noteStartTime, noteEndTime);
+                    notes.add(n);
+                    noteStartTime += this.job.getNoteDuration() + this.job.getNoteDecay() + this.job.getNoteGap();
+                }
+            }
         }
+        ObservableList<Note> noteList = FXCollections.observableArrayList();
+        noteList.addAll(notes);
+
+        // Clearing and updating the noteTableView
+        this.noteTableView.getItems().clear();
+        this.noteTableView.getItems().addAll(noteList);
     }
 
 
