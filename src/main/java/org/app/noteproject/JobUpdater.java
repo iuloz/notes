@@ -18,7 +18,6 @@ import javafx.scene.layout.GridPane;
 import javafx.geometry.Insets;
 import javafx.scene.layout.HBox;
 import javafx.scene.canvas.Canvas;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -68,11 +67,13 @@ public class JobUpdater extends Application {
         spinner1Value = job.getFromNote();
         spinner2Value = job.getToNote();
 
+        // Listener for spinner 1
         spinner1.valueProperty().addListener((observable, oldValue, newValue) -> {
             spinner1Value = newValue;
             populateNoteTable();
         });
 
+        // Listener for spinner 2
         spinner2.valueProperty().addListener((observable, oldValue, newValue) -> {
             spinner2Value = newValue;
             populateNoteTable();
@@ -130,6 +131,7 @@ public class JobUpdater extends Application {
             }
         });
 
+        // Setting note timing sliders
         noteDurationSlider = new Slider(100, 5000, job.getNoteDuration());
         noteDecaySlider = new Slider(100, 4500, job.getNoteDecay());
         gapBtwNotesSlider = new Slider(100, 500, job.getNoteGap());
@@ -146,13 +148,11 @@ public class JobUpdater extends Application {
         gapBtwNotesSlider.setMajorTickUnit(100);
         gapBtwNotesSlider.setBlockIncrement(100);
 
-//        this.jobs.add(this.job); // setting initial project to job list view
-
-        // Updating job with button click
+        // Creating new job with button click
         createNewJobBtn.setOnAction(event -> {
             String newName = jobNameField.getText().trim();
-            int fromNote = spinner1.getValue();
-            int toNote = spinner2.getValue();
+            int fromNote = spinner1Value;
+            int toNote = spinner2Value;
             if (!newName.isEmpty() && newName.length() < 21) {
                 this.job = new Job(newName);
                 job.setFromNote(fromNote);
@@ -180,11 +180,11 @@ public class JobUpdater extends Application {
             }
         });
 
-        // Creating job with ENTER key, when text field is in focus
+        // Creating new job with ENTER key, when text field is in focus
         jobNameField.setOnKeyPressed(event -> {
             String newName = jobNameField.getText().trim();
-            int fromNote = spinner1.getValue();
-            int toNote = spinner2.getValue();
+            int fromNote = spinner1Value;
+            int toNote = spinner2Value;
             if (!newName.isEmpty() && newName.length() < 21) {
                 if (event.getCode() == KeyCode.ENTER) {
                     this.job = new Job(newName);
@@ -217,8 +217,8 @@ public class JobUpdater extends Application {
         // Updating selected job
         updateJobBtn.setOnAction(event -> {
             String newName = jobNameField.getText().trim();
-            int fromNote = spinner1.getValue();
-            int toNote = spinner2.getValue();
+            int fromNote = spinner1Value;
+            int toNote = spinner2Value;
             if (!newName.isEmpty() && newName.length() < 21 && selectedJob != null) {
                 selectedJob.setName(newName);
                 selectedJob.setFromNote(fromNote);
@@ -247,7 +247,7 @@ public class JobUpdater extends Application {
 
         // Creating canvas
         int height = 30;
-        Canvas noteTimingCanvas = new Canvas(500, height);
+        Canvas noteTimingCanvas = new Canvas(350, height);
         GraphicsContext gc = noteTimingCanvas.getGraphicsContext2D();
         gc.setFill(Color.LIGHTGRAY);
         gc.fillRect(
@@ -271,12 +271,12 @@ public class JobUpdater extends Application {
         gc.fillRect(durationWidth + decayWidth, 0, gapWidth, height);
         gc.strokeRect(durationWidth + decayWidth, 0, gapWidth, height);
 
-        // Default note timings
+        // Default note timings to be shown initially in note table
         currentNoteDuration = job.getNoteDuration();
         currentNoteDecay = job.getNoteDecay();
         currentNoteGap = job.getNoteGap();
 
-        // Event handlers to update slider labels
+        // Event handlers to update slider labels and graphical representation
         noteDurationSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
             int duration = newValue.intValue();
             currentNoteDuration = duration;
@@ -354,11 +354,13 @@ public class JobUpdater extends Application {
             populateNoteTable();
         });
 
+        // Horizontal box to store radio buttons
         HBox hbox = new HBox(10);
         hbox.setAlignment(Pos.CENTER);
         hbox.setPadding(new Insets(10));
         hbox.getChildren().addAll(interval1, interval3, interval6, interval12);
 
+        // Vertical box to store sliders and their labels
         VBox slidersVbox = new VBox(10);
         slidersVbox.setPadding(new Insets(5));
         slidersVbox.getChildren().addAll(noteDurationLabel, noteDurationSlider, noteDecayLabel, noteDecaySlider, gapBtwNotesLabel, gapBtwNotesSlider, noteTimingCanvas);
@@ -366,6 +368,7 @@ public class JobUpdater extends Application {
         TitledPane titledPane = new TitledPane("Interval Settings", hbox);
         TitledPane slidersTitlePane = new TitledPane("Note times", slidersVbox);
 
+        // Horizontal box to store buttons
         HBox buttonsBox = new HBox(20);
         buttonsBox.getChildren().addAll(updateJobBtn, createNewJobBtn);
         buttonsBox.setAlignment(Pos.CENTER);
@@ -374,6 +377,7 @@ public class JobUpdater extends Application {
         gridPane.add(slidersTitlePane, 0, 4, 2, 1);
         gridPane.add(buttonsBox, 1, 5, 2, 1);
 
+        // Initial creation of note table and job list on app start
         createNoteTable();
         createJobList();
 
@@ -387,7 +391,7 @@ public class JobUpdater extends Application {
         rootSplitPane.setDividerPositions(0.3); // how much width occupies on window
         rootSplitPane.getItems().addAll(this.jobListView, splitPaneWithTable);
 
-        Scene scene = new Scene(rootSplitPane, 800, 700);
+        Scene scene = new Scene(rootSplitPane, 600, 700);
         stage.setScene(scene);
         stage.setTitle("Job UpdaterV3");
         stage.show();
@@ -438,7 +442,7 @@ public class JobUpdater extends Application {
         List<Note> notesToTable = new ArrayList<>();
         int noteStartTime = 0;
         int noteEndTime = 0;
-        if (selectedJob != null) {
+        if (selectedJob != null) { // when interacting with selected job from the job list
             for (int note : notes) {
                 for (int velocity : this.selectedJob.getVelocities()) {
                     noteEndTime = noteStartTime + currentNoteDuration;
@@ -447,7 +451,7 @@ public class JobUpdater extends Application {
                     noteStartTime += currentNoteDuration + currentNoteDecay + currentNoteGap;
                 }
             }
-        } else {
+        } else { // when no jobs created yet
             for (int note : notes) {
                 for (int velocity : this.job.getVelocities()) {
                     noteEndTime = noteStartTime + currentNoteDuration;
@@ -472,15 +476,11 @@ public class JobUpdater extends Application {
             this.observableJobList.add(job.getName());
         }
         this.jobListView = new ListView<>(this.observableJobList);
-        this.jobListView.getSelectionModel().select(0); // initial/default selection inside the list
         this.jobListView.getSelectionModel().selectedItemProperty().addListener(this::processListSelection); // Listens to what element in the list is selected
-//        this.colorLabel = new Label(observableJobList.get(0)); // default value shown in pane
-//        StackPane colorPane = new StackPane(this.colorLabel);
     }
 
-
+    // Searches for the job in the list of jobs by its name to determine selected job
     public Job findJobByName(String name) {
-        // Search for the job in the list of jobs by its name
         for (Job job : jobs) {
             if (job.getName().equals(name)) {
                 return job;
@@ -489,13 +489,11 @@ public class JobUpdater extends Application {
         return null; // Job not found
     }
 
-
+    // Sets values in job edit view (sliders, name, radio buttons, etc.) for selected job
     public void processListSelection(ObservableValue<? extends String> val, String oldValue, String newValue) {
         // Find the selected job by its name
         selectedJob = findJobByName(newValue);
         if (selectedJob != null) {
-            System.out.println(selectedJob.getNoteDuration());
-            // Update text fields, sliders, labels, etc. with values from the selected job
             jobNameField.setText(selectedJob.getName());
             spinner1.getValueFactory().setValue(selectedJob.getFromNote());
             spinner2.getValueFactory().setValue(selectedJob.getToNote());
