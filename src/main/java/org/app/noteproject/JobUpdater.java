@@ -146,12 +146,11 @@ public class JobUpdater extends Application {
                     }
                 }
                 this.jobs.add(this.job);
-                this.observableJobList.add(this.job.getName()); // Add only the name
-                jobListView.getSelectionModel().selectLast(); // Select the newly added job
+                this.observableJobList.add(this.job.getName()); // Adding the name of newly created job
+                jobListView.getSelectionModel().selectLast(); // Selecting the newly added job
                 populateNoteTable(); // Update the note table
             }
         });
-
 
         // Creating job with ENTER key, when text field is in focus
         jobNameField.setOnKeyPressed(event -> {
@@ -180,13 +179,14 @@ public class JobUpdater extends Application {
                         }
                     }
                     this.jobs.add(this.job);
-                    this.observableJobList.add(this.job.getName()); // Add only the name
-                    jobListView.getSelectionModel().selectLast(); // Select the newly added job
+                    this.observableJobList.add(this.job.getName()); // Adding the name of newly created job
+                    jobListView.getSelectionModel().selectLast(); // Selecting the newly added job
                     populateNoteTable(); // Update the note table
                 }
             }
         });
 
+        // Updating selected job
         updateJobBtn.setOnAction(event -> {
             String newName = jobNameField.getText().trim();
             int fromNote = spinner1.getValue();
@@ -211,9 +211,7 @@ public class JobUpdater extends Application {
                         selectedJob.setInterval(Job.Interval.TWELVE);
                     }
                 }
-
-                // Update the observable list with the updated job name
-                observableJobList.set(jobListView.getSelectionModel().getSelectedIndex(), selectedJob.getName());
+                observableJobList.set(jobListView.getSelectionModel().getSelectedIndex(), selectedJob.getName()); // Updating the observable list with the updated job name
                 populateNoteTable(); // Update the note table
             }
         });
