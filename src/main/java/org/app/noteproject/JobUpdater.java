@@ -426,7 +426,7 @@ public class JobUpdater extends Application {
         String newName = this.jobNameField.getText().trim();
         int fromNote = this.spinner1Value;
         int toNote = this.spinner2Value;
-        if (!newName.isEmpty() && newName.length() < 21) {
+        if (!newName.isEmpty() && newName.length() < 21 && !observableJobList.contains(newName)) {
             this.job = new Job(newName);
             this.job.setFromNote(fromNote);
             this.job.setToNote(toNote);
@@ -450,6 +450,12 @@ public class JobUpdater extends Application {
             this.observableJobList.add(this.job.getName()); // Adding the name of newly created job
             this.jobListView.getSelectionModel().selectLast(); // Selecting the newly added job
             populateNoteTable(); // Update the note table
+        } else {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("Invalid Name");
+            alert.setHeaderText(null);
+            alert.setContentText("Please enter a unique name (max 20 characters).");
+            alert.showAndWait();
         }
     }
 
@@ -460,29 +466,37 @@ public class JobUpdater extends Application {
         int toNote = this.spinner2Value;
         if (!newName.isEmpty() && newName.length() < 21) {
             if (event.getCode() == KeyCode.ENTER) {
-                this.job = new Job(newName);
-                this.job.setFromNote(fromNote);
-                this.job.setToNote(toNote);
-                this.job.setNoteDuration(this.currentNoteDuration);
-                this.job.setNoteDecay(this.currentNoteDecay);
-                this.job.setNoteGap(this.currentNoteGap);
+                if (!observableJobList.contains(newName)) {
+                    this.job = new Job(newName);
+                    this.job.setFromNote(fromNote);
+                    this.job.setToNote(toNote);
+                    this.job.setNoteDuration(this.currentNoteDuration);
+                    this.job.setNoteDecay(this.currentNoteDecay);
+                    this.job.setNoteGap(this.currentNoteGap);
 
-                // Accessing selected radio button
-                if (this.selectedRadioButton != null) {
-                    if (this.selectedRadioButton.equals(this.interval1)) {
-                        this.job.setInterval(Job.Interval.ONE);
-                    } else if (this.selectedRadioButton.equals(this.interval3)) {
-                        this.job.setInterval(Job.Interval.THREE);
-                    } else if (this.selectedRadioButton.equals(this.interval6)) {
-                        this.job.setInterval(Job.Interval.SIX);
-                    } else if (this.selectedRadioButton.equals(this.interval12)) {
-                        this.job.setInterval(Job.Interval.TWELVE);
+                    // Accessing selected radio button
+                    if (this.selectedRadioButton != null) {
+                        if (this.selectedRadioButton.equals(this.interval1)) {
+                            this.job.setInterval(Job.Interval.ONE);
+                        } else if (this.selectedRadioButton.equals(this.interval3)) {
+                            this.job.setInterval(Job.Interval.THREE);
+                        } else if (this.selectedRadioButton.equals(this.interval6)) {
+                            this.job.setInterval(Job.Interval.SIX);
+                        } else if (this.selectedRadioButton.equals(this.interval12)) {
+                            this.job.setInterval(Job.Interval.TWELVE);
+                        }
                     }
+                    this.jobs.add(this.job);
+                    this.observableJobList.add(this.job.getName()); // Adding the name of newly created job
+                    this.jobListView.getSelectionModel().selectLast(); // Selecting the newly added job
+                    populateNoteTable(); // Update the note table
+                } else {
+                    Alert alert = new Alert(Alert.AlertType.WARNING);
+                    alert.setTitle("Invalid Name");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Please enter a unique name (max 20 characters).");
+                    alert.showAndWait();
                 }
-                this.jobs.add(this.job);
-                this.observableJobList.add(this.job.getName()); // Adding the name of newly created job
-                this.jobListView.getSelectionModel().selectLast(); // Selecting the newly added job
-                populateNoteTable(); // Update the note table
             }
         }
     }
