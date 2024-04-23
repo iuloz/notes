@@ -103,7 +103,6 @@ public class JobUpdater extends Application {
 
         // Event handlers to update slider labels and graphical representation
         this.noteDurationSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
-            int height = 30;
             int duration = newValue.intValue();
             this.currentNoteDuration = duration;
             noteDurationLabel.setText("Note Duration: " + duration + " ms");
@@ -127,7 +126,6 @@ public class JobUpdater extends Application {
         });
 
         this.noteDecaySlider.valueProperty().addListener((ov, oldValue, newValue) -> {
-            int height = 30;
             int decay = newValue.intValue();
             this.currentNoteDecay = decay;
             noteDecayLabel.setText("Note Decay: " + decay + " ms");
@@ -146,7 +144,6 @@ public class JobUpdater extends Application {
         });
 
         this.gapBtwNotesSlider.valueProperty().addListener((ov, oldValue, newValue) -> {
-            int height = 30;
             int gap = newValue.intValue();
             this.currentNoteGap = gap;
             gapBtwNotesLabel.setText("Note Gap: " + gap + " ms");
