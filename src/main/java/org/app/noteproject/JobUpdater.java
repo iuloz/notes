@@ -204,7 +204,7 @@ public class JobUpdater extends Application {
 
         Scene scene = new Scene(rootSplitPane, 600, 700);
         stage.setScene(scene);
-        stage.setTitle("Job UpdaterV3");
+        stage.setTitle("Job Updater");
         stage.show();
     }
 
